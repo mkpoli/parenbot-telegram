@@ -8,6 +8,9 @@ TOKEN=""
 from telegram.ext import Updater
 import logging
 
+from telegram import Update
+from telegram.ext import CallbackContext, Updater, MessageHandler, Filters
+
 logging.basicConfig(
         format='[%(levelname)s] %(asctime)s - %(message)s',
         level=logging.INFO)
@@ -27,7 +30,7 @@ def error(bot, update, error):
 def str_make (str_, length):
 	return str_ * length
 
-def balance(bot, update):
+def balance(update: Update, context: CallbackContext):
 	#log (bot, update)
 	openbrckt = ('<([{（［｛⦅〚⦃“‘‹«「〈《【〔⦗『〖〘｢⟦⟨⟪⟮⟬⌈⌊⦇⦉❛❝❨❪❴❬❮❰❲'
 		     '⏜⎴⏞〝︵⏠﹁﹃︹︻︗︿︽﹇︷〈⦑⧼﹙﹛﹝⁽₍⦋⦍⦏⁅⸢⸤⟅⦓⦕⸦⸨｟⧘⧚⸜⸌⸂⸄⸉᚛༺༼')
@@ -36,7 +39,8 @@ def balance(bot, update):
 	parenmap  = dict(zip(openbrckt,clozbrckt))
 	stack = []
 	bad = False
-	for ch in update.message.text:
+
+	for ch in update.effective_message.text:
 		if ch in parenmap:
 			stack.append(ch)
 		elif ch in parenmap.values():
@@ -46,14 +50,14 @@ def balance(bot, update):
 				stack.pop()
 	close = ''.join(map(parenmap.__getitem__, reversed(stack)))
 	if close:
-		bot.sendMessage(update.message.chat_id, text=(("(╯°□°）╯ %s" if bad else "%s ○(￣□￣○)") % close))
+		update.effective_message.reply_text(f"(╯°□°）╯ {close}" if bad else f"{close} ○(￣□￣○)")
 
 def main():
 	updater = Updater(TOKEN)
 	dp = updater.dispatcher
-	dp.addTelegramMessageHandler(balance)
-	dp.addErrorHandler(error)
-	updater.start_polling()
+	dp.add_handler(MessageHandler(Filters.text & (~Filters.command), balance))
+	dp.add_error_handler(error)
+
 	updater.idle()
 	
 if __name__ == '__main__':
