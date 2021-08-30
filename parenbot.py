@@ -3,13 +3,13 @@
 #
 # A telegram bot that hates unmatched parentheses.
 
-TOKEN=""
 
-from telegram.ext import Updater
 import logging
 
 from telegram import Update
 from telegram.ext import CallbackContext, Updater, MessageHandler, Filters
+
+from _env import TOKEN, PRODUCTION_MODE, get_webhook_info
 
 logging.basicConfig(
         format='[%(levelname)s] %(asctime)s - %(message)s',
@@ -58,7 +58,22 @@ def main():
 	dp.add_handler(MessageHandler(Filters.text & (~Filters.command), balance))
 	dp.add_error_handler(error)
 
+	if PRODUCTION_MODE:
+		url, port = get_webhook_info()
+		url_path = url + TOKEN
+		logger.info(f"Starting Webhook on { port } ...")
+		updater.start_webhook(
+			listen = "0.0.0.0",
+			port = port,
+			url_path = TOKEN
+		)
+		updater.bot.set_webhook(url_path)
+		logger.info(f"Webhook set on { url }/<TOKEN>")
+	else:
+		logger.info("Starting Polling...")
+		updater.start_polling()
+
 	updater.idle()
-	
+ 
 if __name__ == '__main__':
 	main()
