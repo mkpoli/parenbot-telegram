@@ -65,9 +65,9 @@ def main():
 		updater.start_webhook(
 			listen = "0.0.0.0",
 			port = port,
-			url_path = TOKEN
+			url_path = TOKEN,
+   			webhook_url = url + TOKEN
 		)
-		updater.bot.set_webhook(url_path)
 		logger.info(f"Webhook set on { url }/<TOKEN>")
 	else:
 		logger.info("Starting Polling...")

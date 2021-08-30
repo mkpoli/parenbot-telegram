@@ -9,5 +9,5 @@ PRODUCTION_MODE = bool(os.environ.get('TELEGRAM_BOT_PRODUCTION', default=False))
 
 def get_webhook_info() -> Tuple[str, int]:
     url = os.environ.get('URL')
-    port = int(os.environ.get('PORT', 8000))
+    port = int(os.environ.get('PORT', 8443))
     return url, port
